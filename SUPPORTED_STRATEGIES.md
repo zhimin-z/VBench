@@ -54,9 +54,10 @@ This analysis is based on:
 **Status:** **NOT SUPPORTED**
 
 **Evidence:**
-- No Dockerfile or docker-compose.yml in the main repository
-- Dockerfiles only exist in third_party subdirectories (YOLO-World)
-- No container images mentioned in installation documentation
+- No Dockerfile or docker-compose.yml for VBench itself
+- Dockerfiles found are only in deeply nested third_party subdirectories (VBench-2.0/vbench2/third_party/YOLO-World) for external dependencies, not for VBench
+- No container images mentioned in VBench installation documentation
+- No Docker-based installation workflow documented
 
 ### Step B: Service Authentication
 
@@ -186,8 +187,15 @@ This analysis is based on:
   - Qwen LLM judge: complex_plot.py, motion_order_understanding.py
   - LLaVA-Video multimodal judge: complex_plot.py
   ```python
-  qwen_model = AutoModelForCausalLM.from_pretrained("Qwen2.5-7B-Instruct")
-  llava_model = load_pretrained_model("LLaVA-Video-7B-Qwen2")
+  # Actual code from complex_plot.py:
+  qwen_model = AutoModelForCausalLM.from_pretrained(
+      qwen_model_name,
+      torch_dtype="auto",
+      device_map="auto",
+      cache_dir=submodules_dict['qwen']
+  )
+  qwen_tokenizer = AutoTokenizer.from_pretrained(qwen_model_name, cache_dir=submodules_dict['qwen'])
+  llava_model, llava_tokenizer, image_processor, max_length = load_pretrained_model(...)
   ```
 - System prompts define judge behavior: "You are a brilliant plot consistency judger"
 - README: "we highly recommend users to download the model before evaluation"
